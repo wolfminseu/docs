@@ -1,56 +1,64 @@
 ---
-title: "Hello"
-description: "Welcome to the new home for your documentation"
+title: "智慧芽 SSO 配置指南"
+description: "智慧芽单点登录(SSO)配置文档，支持多种企业身份认证方式"
 ---
 
-## Setting up
+# 智慧芽 SSO 配置指南
 
-Get your documentation site up and running in minutes.
+欢迎使用智慧芽单点登录(SSO)配置文档。本文档将帮助您快速完成企业与智慧芽的SSO对接。
 
-<Card title="Start here" icon="rocket" horizontal href="/quickstart">
-  Follow our three step quickstart guide.
-</Card>
+## 支持的 SSO 方式
 
-## Make it yours
+智慧芽目前支持以下6种SSO对接方式：
 
-Design a docs site that looks great and empowers your users.
-
-<Columns cols={2}>
-  <Card title="Edit locally" icon="pen-to-square" href="/development">
-    Edit your docs locally and preview them in real time.
+<CardGroup cols={2}>
+  <Card title="SAML 2.0" icon="shield-check" href="/sso/SAML">
+    标准SAML 2.0协议，适用于大多数企业身份认证系统
   </Card>
-  <Card title="Customize your site" icon="palette" href="/essentials/settings">
-    Customize the design and colors of your site to match your brand.
+  <Card title="OAuth 2.0" icon="key" href="/sso/oauth2-setup">
+    现代OAuth 2.0协议，适用于云原生应用
   </Card>
-  <Card title="Set up navigation" icon="map" href="/essentials/navigation">
-    Organize your docs to help users find what they need and succeed with your product.
+  <Card title="钉钉" icon="message" href="/sso/dingtalk-setup">
+    阿里钉钉企业应用集成
   </Card>
-  <Card title="API documentation" icon="terminal" href="/api-reference/introduction">
-    Auto-generate API documentation from OpenAPI specifications.
+  <Card title="企业微信" icon="wechat" href="/sso/wecom-setup">
+    腾讯企业微信应用集成
   </Card>
-</Columns>
+  <Card title="飞书" icon="feather" href="/sso/feishu-setup">
+    字节跳动飞书企业应用集成
+  </Card>
+  <Card title="CARSI" icon="graduation-cap" href="/sso/carsi-setup">
+    中国教育和科研计算机网统一认证
+  </Card>
+</CardGroup>
 
-## Create beautiful pages
+## 快速开始
 
-Everything you need to create world-class documentation.
+<Steps>
+  <Step title="选择SSO方式">
+    根据您企业的身份认证系统，选择合适的SSO对接方式
+  </Step>
+  <Step title="获取配置信息">
+    登录智慧芽管理员工作台，获取SP配置信息
+  </Step>
+  <Step title="配置企业系统">
+    在您的企业身份认证系统中添加智慧芽应用
+  </Step>
+  <Step title="完成对接配置">
+    在智慧芽系统中配置IDP信息，完成SSO对接
+  </Step>
+</Steps>
 
-<Columns cols={2}>
-  <Card title="Write with MDX" icon="pen-fancy" href="/essentials/markdown">
-    Use MDX to style your docs pages.
-  </Card>
-  <Card title="Code samples" icon="code" href="/essentials/code">
-    Add sample code to demonstrate how to use your product.
-  </Card>
-  <Card title="Images" icon="image" href="/essentials/images">
-    Display images and other media.
-  </Card>
-  <Card title="Reusable snippets" icon="recycle" href="/essentials/reusable-snippets">
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
+## 需要帮助？
 
-## Need inspiration?
-
-<Card title="See complete examples" icon="stars" href="https://mintlify.com/customers">
-  Browse our showcase of exceptional documentation sites.
-</Card>
+<CardGroup cols={3}>
+  <Card title="管理员工作台" icon="gear" href="https://admin.zhihuiya.com">
+    登录智慧芽管理员工作台进行配置
+  </Card>
+  <Card title="技术支持" icon="envelope" href="mailto:support@zhihuiya.com">
+    如有技术问题，请联系我们的技术支持团队
+  </Card>
+  <Card title="智慧芽官网" icon="globe" href="https://www.zhihuiya.com">
+    了解更多智慧芽产品信息
+  </Card>
+</CardGroup>

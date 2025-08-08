@@ -1,0 +1,150 @@
+---
+title: "SSO单点登录设置 - SAML 2.0"
+description: "智慧芽 SAML 2.0 单点登录配置指南"
+---
+
+# SSO单点登录设置 - SAML 2.0
+
+智慧芽目前提供：**钉钉**、**企业微信**、**飞书**、**SAML 2.0**、**CARSI** 和 **OAuth 2.0** 共6种SSO对接方式。
+
+当企业采购了智慧芽产品，且企业OA系统当前已经支持SAML 2.0协议时，可选择SAML 2.0与智慧芽进行SSO对接。IT 人员通过简单的配置即可完成对接，无需二次开发。
+
+<Info>
+企业方为 **IDP 服务**，智慧芽为 **SP 服务**。
+</Info>
+
+## 一、获取智慧芽的 SP 配置
+
+根据您的服务器要求，获取以下配置信息：
+
+| 配置项 | URL |
+|--------|-----|
+| ACS URL（Assertion Consumer Service URL） | `https://passport.zhihuiya.com/saml/SSO` |
+| Entity ID（Audience URI） | `https://sp.passport.patsnap.com` |
+| Metadata URL | `https://passport.zhihuiya.com/saml/metadata` |
+
+### 操作步骤
+
+1. 企业管理员登录 [智慧芽管理员工作台](https://admin.zhihuiya.com/#/ssosettings)
+2. 在左侧导航栏中，选择 **系统设置 > SSO单点登录设置**
+3. 将身份认证服务器设置为 **SAML 2.0**
+4. 获取SAML服务配置信息
+
+![SSO单点登录设置页面](/images/sso-saml-config.png)
+
+## 二、在企业的用户管理服务器中，增加智慧芽的 SP 应用
+
+根据您企业实际情况自行配置。
+
+<Warning>
+授权智慧芽的 SP 获取您员工的用户 ID、邮箱或手机号。
+</Warning>
+
+### 用户信息处理逻辑
+
+- **传入邮箱与手机号**：系统会自动关联已经存在的账号，或使用该邮箱或手机号自动创建新账号
+- **仅传入用户 ID**：在用户登录时，系统会要求其录入邮箱或手机号，后续逻辑与上一步相同
+
+## 三、配置SSO对接信息
+
+### 设置认证信息
+
+1. 企业管理员登录 [智慧芽管理员工作台](https://admin.zhihuiya.com/#/ssosettings)
+2. 在左侧导航栏中，选择 **系统设置 > SSO单点登录设置**
+3. 将身份认证服务器设置为 **SAML 2.0**，并配置SAML服务信息
+
+![配置认证信息](/images/sso-auth-config.png)
+
+### 配置 IDP 信息
+
+将您IDP服务器的 **Metadata URL** 与 **Entity ID** 录入智慧芽系统中。
+
+### 字段映射配置
+
+智慧芽默认字段取值逻辑：
+
+| 字段 | 取值逻辑 |
+|------|----------|
+| 用户 ID | 从 attribute `uid` 中获取 |
+| 邮箱地址 | 优先从 `nameId`（格式为 emailAddress）获取，如果没有则从 `mail` 中获取 |
+| 手机号码 | 从 attribute `mobile` 中获取 |
+| 名字 | 从 attribute `name` 中获取 |
+| 职位 | 从 attribute `job_role` 中获取 |
+| 工号 | 从 attribute `work_number` 中获取 |
+
+<Tip>
+如果以上默认规则不符合您的实际情况，您可点击【自定义】自行配置映射关系。
+</Tip>
+
+![自定义字段逻辑](/images/sso-custom-fields.png)
+
+## 四、默认登录产品
+
+可选择整个公司统一默认登录的产品，也可不选择，系统将会按照默认逻辑登录产品。
+
+如果您需要在您的平台上配置多个入口，直接登录某产品，也可直接获取链接。
+
+<Info>
+保存好SSO的配置后，会自动显示通过SSO方式登录各产品的链接。
+</Info>
+
+## 五、调试
+
+### 获取智慧芽产品网址
+
+```url
+https://passport.zhihuiya.com/saml/login?idp=${xxx}
+```
+
+<Warning>
+请将 `${xxx}` 修改为企业的 Entity ID。
+</Warning>
+
+还可以在保存企业配置后，复制页面下方的登录网址：
+
+![智慧芽产品地址](/images/sso-product-url.png)
+
+### 调试步骤
+
+1. 访问上述网址，跳转向您的内部认证系统
+2. 登录您内部认证系统，自动跳转并登录智慧芽产品
+
+## 六、在企业内部系统中添加智慧芽应用链接
+
+在您内部系统的合适位置添加访问智慧芽产品的链接，以便您的员工能快速的使用智慧芽产品。
+
+### 基础链接
+
+链接地址与您的调试地址相同。
+
+### 带重定向的链接
+
+如果您希望员工登录成功后，直接进入智慧芽的某个指定页面，可增加参数 `redirect_uri`，值为要访问页面的链接地址 urlencode 后的字符串。
+
+**示例**：登录成功后，直接进入工作空间首页
+
+```url
+https://passport.zhihuiya.com/saml/login?idp=${yourentityid}&redirect_uri=https%3A%2F%2Fworkspace.zhihuiya.com
+```
+
+<Tip>
+您也可以将智慧芽的 Logo 加在链接前，以帮助您的员工快速登录智慧芽。该Logo 可在管理员工作台的 SSO 配置页的底部下载。
+</Tip>
+
+## 七、常见问题
+
+### 问题 1：为什么使用账号密码登录会报错？
+
+**解答**：若您的企业采用了SSO对接的企业版套餐，则仅能通过SSO的方式登录智慧芽。
+
+### 问题 2：您的大部分员工点击智慧芽应用并登录后，页面显示没权限。
+
+**解答**：请到 [管理员工作台](https://admin.zhihuiya.com/#/selfRegisterAndPrivilegesSetting) 检查是否开启权限自动分配。
+
+权限自动分配的操作方法可查看：[企业配置 - 用户账号注册和自动分配权限](https://help.zhihuiya.com/help/7518927683865/article/10518003698841?categoryId=7518870868633)
+
+### 问题 3：在开启了权限自动分配后，仍有部分员工显示没权限。
+
+**解答**：这部分员工的权限可能在早些时候被手动删除过。您只需为这部分员工重新手动分配权限即可。
+
+操作方法请参考：[用户管理](https://help.zhihuiya.com/help/7518927683865/article/10517875326873?categoryId=7518870868633)
