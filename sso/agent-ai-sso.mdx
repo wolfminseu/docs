@@ -1,0 +1,126 @@
+## 1. 流程描述
+
+### 1.1 整体流程图
+
+### 1.2 流程说明
+
+整个AI Agent SSO对接流程分为以下几个关键步骤：
+
+1. **用户触发**：用户在客户OA系统中访问相关页面，触发AI Agent功能
+2. **身份准备**：OA系统使用RSA公钥加密用户身份信息（email:nonce:timestamp格式）
+3. **SSO认证**：向智慧芽Passport发起一步认证请求，直接获取32位ticket
+4. **API调用**：使用获得的ticket调用智慧芽OpenAPI创建技术问答任务
+5. **页面跳转**：重定向到智慧芽Eureka平台展示AI Agent界面
+
+该流程的核心优势是**一步完成认证**，无需用户手动登录，提供无缝的用户体验。
+
+| 注意  以下需要智慧芽方处理：  1. 在智慧芽后台系统创建OA方对应公司 2. 在该公司上配置临时Token请求所处的IP段（即OA系统的固定IP） 3. 为该公司上生成公私钥密钥对，并将公钥发送给OA系统方 |
+| :-------------------------------------------------------------------------------------------------------- |
+
+# 接口描述
+
+## 2. 接口描述
+
+### 2.1 SSO一步认证接口
+
+#### 基本信息
+
+- **接口路径**: `/public/jwt/sso`
+- **请求方法**: `POST`
+- **Content-Type**: `application/x-www-form-urlencoded`
+- **认证方式**: 无需认证（公开接口）
+- **限流配置**: 200 QPS
+- **一次性使用**: 每个encrypted_key只能使用一次
+
+#### 请求参数
+
+| 参数名           | 类型     | 必填 | 描述                                       |
+| :------------ | :----- | :-- | :--------------------------------------- |
+| encrypted_key | String | 是  | 加密的用户身份信息，格式为：RSA(email:nonce:timestamp) |
+| redirect_uri  | String | 否  | 认证成功后的重定向URI，如果提供则返回302重定向，否则返回ticket    |
+
+#### encrypted_key参数详解
+
+encrypted_key参数是使用RSA公钥加密的用户身份信息，明文格式为：`email:nonce:timestamp`
+
+- **email**: 用户邮箱地址，必须符合邮箱格式规范
+- **nonce**: 随机字符串，用于防重放攻击，建议使用UUID
+- **timestamp**: 时间戳（毫秒级），用于控制有效期，有效期为10分钟
+
+示例明文: `user@example.com:a1b2c3d4e5f67890abcdef1234567890:1672531200000`
+
+#### 响应格式
+
+**成功响应**
+
+**情况1**：不提供redirect_uri
+
+- 状态码: 200
+- Content-Type: text/plain
+- 响应体: 32位ticket字符串
+
+情况2：提供redirect_uri
+
+- 状态码: 302
+- Location Header: `{redirect_uri}?ticket={ticket}`
+
+#### 请求示例
+
+| ``` curl --location --request POST 'https://passport.zhihuiya.com/public/jwt/sso' \  --header 'Content-Type: application/x-www-form-urlencoded' \  --data-urlencode 'encrypted_key=YOUR_ENCRYPTED_KEY' ``` |
+| :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+
+### 2.2 AI Agent ---以技术问答Agent创建接口为例
+
+#### 基本信息
+
+- **接口路径**: `/technical-qa-agent-creation`
+- **请求方法**: `POST`
+- **Content-Type**: `application/json`
+- **认证方式**: Ticket认证
+
+#### 请求参数
+
+| 参数名       | 类型     | 必填 | 描述                   |
+| :-------- | :----- | :-- | :------------------- |
+| text      | String | 是  | 技术需求描述文本             |
+| lang      | String | 是  | 语言代码（如：zh-CN, en-US） |
+| tenant_id | String | 是  | 租户ID                 |
+| email     | String | 否  | 用户邮箱（使用ticket时可选）    |
+
+#### 请求头
+
+| 参数名              | 类型     | 必填 | 描述                     |
+| :--------------- | :----- | :-- | :--------------------- |
+| x-patsnap-ticket | String | 否  | 从SSO获取的ticket，用于用户身份验证 |
+
+#### Ticket说明
+
+Ticket是从SSO认证接口获得的32位字符串，具有以下特性：
+
+- **一次性使用**：每个ticket只能使用一次
+- **有效期**：30分钟内有效
+- **用户绑定**：ticket与特定用户身份绑定
+- **自动解析**：系统会自动从ticket中解析用户信息
+
+#### 响应格式
+
+| ``` { 	"code": 200, 	"message": "success", 	"data": { 		"task_id": "881f0c60-aee3-4e3a-8c71-de173e9cbc0c" 	} } ``` |
+| :----------------------------------------------------------------------------------------------------------------- |
+
+#### 请求示例
+
+| ``` curl -X POST 'https://stage-connect.zhihuiya.com/ai/technical-qa-agent-creation?apikey=55id39kdzt134ukzit1vsaxjjk53e72phwnzhhqzm6ectg8o' \ -H 'Content-Type: application/json' \ -H 'authorization: Bearer {token}' \ -H 'x-patsnap-ticket: {ticket}' \ -d '{   "lang": "cn",   "text": "我想开发一款防晒系数SPF 50且具有防水性能的防晒霜。我希望在其中添加氧化锌和甘油。",   "email": "example@patsnap.com",   "ticket": 123,   "tenant_id": 123 }'  ``` |
+| :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+
+### 2.3 最终重定向
+
+获取到task_id后，系统会重定向到智慧芽Eureka平台：
+
+复制\
+`https://eureka.zhihuiya.com/ai/agent-flow/881f0c60-aee3-4e3a-8c71-de173e9cbc0c`
+
+用户将在此页面看到AI技术问答助手的分析结果和交互界面。
+
+# 样例代码
+
+### js/Vues
