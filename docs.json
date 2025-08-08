@@ -22,7 +22,8 @@
           {
             "group": "SSO 配置",
             "pages": [
-              "sso/SAML"
+              "sso/SAML",
+              "sso/agent-ai-sso"
             ]
           }
         ]
